@@ -1,8 +1,6 @@
-# fitpulse-marketing-performance-dashboard-fitpulse-ad-performance-analysis
-End-to-end marketing analytics project for a simulated DTC fitness brand  PostgreSQL data cleaning and normalization, SQL funnel analysis, and a 6-page Power BI dashboard diagnosing why ad spend was rising while profitability quietly declined.
-
 # FitPulse Marketing Performance and Profitability Analysis
-### Performance Dashboard (Part 1 of 2)
+
+*A performance analytics deep-dive into FitPulse, a direct-to-consumer fitness brand, tracing why ad spend kept climbing for two years while true profitability quietly eroded beneath a healthy-looking ROAS.*
 
 ---
 
@@ -21,6 +19,16 @@ This repository documents the Performance side of the analysis (the "are we reac
 Eighteen months into a spending increase, the marketing team at FitPulse is still reporting strong numbers. Impressions are up. Reach is up. Return on ad spend still shows green in every dashboard export. So why does it feel like the harder the team pushes, the less ground gets covered?
 
 This project sets out to find the answer, not by assuming it, but by building the pipeline needed to actually see what the data says.
+
+---
+
+## Project Overview
+
+The goal of this project was to build a complete, reproducible marketing analytics workflow: generate a realistic campaign dataset, clean and normalize it in a relational database, write diagnostic SQL across the full marketing funnel, and surface the findings in an interactive, filterable Power BI dashboard, the kind of tool a real marketing analyst would hand to leadership to answer hard questions about where spend is working and where it is not.
+
+The analysis follows the marketing funnel end to end: Awareness, Attention, Interest, Conversion, Efficiency, and Decision, treating each stage as its own investigation with its own central question, rather than presenting a single flat performance summary.
+
+**Figure 1: Dashboard overview page.**
 
 ---
 
@@ -73,14 +81,6 @@ There was no decision framework for what to do with any given ad. Should it be s
 
 ---
 
-## Project Overview
-
-The goal of this project was to build a complete, reproducible marketing analytics workflow: generate a realistic campaign dataset, clean and normalize it in a relational database, write diagnostic SQL across the full marketing funnel, and surface the findings in an interactive, filterable Power BI dashboard, the kind of tool a real marketing analyst would hand to leadership to answer hard questions about where spend is working and where it is not.
-
-The analysis follows the marketing funnel end to end: Awareness, Attention, Interest, Conversion, Efficiency, and Decision, treating each stage as its own investigation with its own central question, rather than presenting a single flat performance summary.
-
----
-
 ## Tools and Technologies
 
 | Tool | Purpose |
@@ -128,7 +128,9 @@ The dataset is a fully synthetic marketing performance dataset generated in Pyth
 
 An intentional messiness layer was built into the dataset for realistic SQL cleaning practice: casing inconsistencies in platform and product names, campaign name suffixes (_v2, _test, _copy), approximately 1% duplicate rows (suffixed _dup), and NULL values in hook_rate and completion_rate.
 
-**Figure 1: Data dictionary table, full list of 44 columns, grouped by Identity/Creative, Product Economics, Funnel/Fatigue, Engagement/Spend, Conversion/Revenue, and Calculated fields.**
+**Figure 2: Raw dataset screenshot showing all columns.**
+
+**Figure 3: Data dictionary table, full list of 44 columns, grouped by Identity/Creative, Product Economics, Funnel/Fatigue, Engagement/Spend, Conversion/Revenue, and Calculated fields.**
 
 ### Data Dictionary, All 44 Columns
 
@@ -230,7 +232,7 @@ DELETE FROM fitpulse_raw
 WHERE row_id LIKE '%_dup';
 \```
 
-**Figure 2: Screenshot of the duplicate-removal query and before/after row counts.**
+**Figure 4: Screenshot of the duplicate-removal query and before/after row counts.**
 
 **Step 4: NULL Audit Across All 38 Columns**
 Ran one unified query checking all 38 columns for NULLs at the same time, rather than checking column by column. Confirmed NULLs were isolated to hook_rate and completion_rate only. Confirmed zero NULLs in product_cost and fixed_cost_allocation, which are critical for downstream profitability calculations.
@@ -245,7 +247,7 @@ SELECT
 FROM fitpulse_raw;
 \```
 
-**Figure 3: Screenshot of the SQL NULL-audit query and result set in pgAdmin.**
+**Figure 5: Screenshot of the SQL NULL-audit query and result set in pgAdmin.**
 
 **Step 5: Categorical Cleanup**
 Standardized inconsistent casing (meta, TIKTOK, youtube became Meta, TikTok, YouTube) and stripped campaign name noise (_v2, _test, _copy suffixes) using REGEXP_REPLACE.
@@ -267,7 +269,7 @@ SET breakeven_roas = ROUND(
   selling_price / NULLIF(selling_price - product_cost, 0), 4);
 \```
 
-**Figure 4: Screenshot of the calculated-columns ALTER TABLE/UPDATE sequence.**
+**Figure 6: Screenshot of the calculated-columns ALTER TABLE/UPDATE sequence.**
 
 **Step 9: Backup**
 A full clean flat table backup was created before normalization began.
@@ -295,8 +297,8 @@ dim_date was populated using PostgreSQL's generate_series function to create one
 
 A single master view, vw_performance_master, joins all 5 tables and exposes every column needed for the Performance dashboard. Power BI connects to this one view rather than querying individual tables, keeping the data model simple and the source of truth centralized.
 
-**Figure 5: Screenshot of the vw_performance_master view definition in pgAdmin.**
-**Figure 6: Screenshot of the Power BI model view showing the relationship between vw_performance_master and dim_date.**
+**Figure 7: Screenshot of the vw_performance_master view definition in pgAdmin.**
+**Figure 8: Screenshot of the Power BI model view showing the relationship between vw_performance_master and dim_date.**
 
 ---
 
@@ -313,6 +315,8 @@ A single master view, vw_performance_master, joins all 5 tables and exposes ever
 | CTR vs CVR (paired) | Distinguishes traffic-quality platforms from conversion-quality platforms. A platform can win on one and lose badly on the other. |
 | ROAS vs Breakeven ROAS | The core diagnostic of the whole project. ROAS alone cannot tell you if a campaign is profitable. |
 
+**Figure 9: Screenshot of the KPI DAX measures pane in Power BI.**
+
 ---
 
 ## Dashboard Pages
@@ -324,16 +328,16 @@ A single master view, vw_performance_master, joins all 5 tables and exposes ever
 
 **Key Insight:** Revenue growth is actively masking a profitability crisis. The headline numbers look healthy while the underlying unit economics are not.
 
-**Figure 7: Executive Summary dashboard page.**
+**Figure 10: Executive Summary dashboard page.**
 
 ### Page 2: Awareness
 **Question:** Are we reaching the right people, and is our money in the right place?
 
 **Findings:** Frequency is nearly identical across all 4 platforms (3.46 to 3.48), no platform is structurally better at avoiding audience overexposure. Cost efficiency diverges sharply though: TikTok is the cheapest platform to reach people on ($0.03 per reach, CPM 8.6), while YouTube is the most expensive ($0.05 per reach, CPM 15.9), nearly double, for equivalent reach and frequency.
 
-**Key Insight:** Reach efficiency and audience overexposure are two separate problems. FitPulse's overexposure issue is universal across platforms, but its cost-efficiency gap is entirely platform-driven, with YouTube the clear underperformer.
+**Key Insight:** Reach efficiency and audience overexposure are two separate problems. FitPulse's overexposure are two separate problems. FitPulse's overexposure issue is universal across platforms, but its cost-efficiency gap is entirely platform-driven, with YouTube the clear underperformer.
 
-**Figure 8: Awareness dashboard page (platform-filtered views).**
+**Figure 11: Awareness dashboard page (platform-filtered views).**
 
 ### Page 3: Attention
 **Question:** When people see the ad, are they stopping, watching, and staying?
@@ -342,7 +346,7 @@ A single master view, vw_performance_master, joins all 5 tables and exposes ever
 
 **Key Insight:** The attention collapse is a volume problem, not a retention problem, and it tracks closely with the fatigue trend found on the Efficiency page.
 
-**Figure 9: Attention dashboard page (platform and year-filtered views).**
+**Figure 12: Attention dashboard page (platform and year-filtered views).**
 
 ### Page 4: Interest and Conversion
 **Question:** Are clicks turning into purchases, and where is the funnel leaking?
@@ -351,7 +355,7 @@ A single master view, vw_performance_master, joins all 5 tables and exposes ever
 
 **Key Insight:** The funnel does not leak evenly. It leaks specifically and consistently on TikTok, post-click, reflecting a platform-level mismatch between scroll-driven curiosity traffic and purchase-ready search traffic.
 
-**Figure 10: Interest and Conversion dashboard page (product-filtered views).**
+**Figure 13: Interest and Conversion dashboard page (product-filtered views).**
 
 ### Page 5: Efficiency
 **Question:** Was the spend worth it, and can we do more of it?
@@ -360,7 +364,7 @@ A single master view, vw_performance_master, joins all 5 tables and exposes ever
 
 **Key Insight:** FitPulse's decline is not a chronic, unsolvable problem. It is a fatigue-driven, dateable collapse. Campaigns are healthy while fresh and fail predictably once fatigue crosses a threshold, meaning the fix is a creative-refresh cadence tied to fatigue score, not a wholesale platform or product exit.
 
-**Figure 11: Efficiency dashboard page (fatigue-filtered and year-filtered views).**
+**Figure 14: Efficiency dashboard page (fatigue-filtered and year-filtered views).**
 
 ### Page 6: Decision Center
 **Question:** Where should FitPulse protect, cut, or invest?
@@ -369,7 +373,7 @@ A single master view, vw_performance_master, joins all 5 tables and exposes ever
 
 **Key Insight:** The recommended action is precise, not blanket: cut Protein Bars everywhere, concentrate remaining spend on Whey Protein and Creatine specifically on Google and TikTok, and tie creative refresh timing to fatigue score rather than waiting for ROAS to visibly collapse.
 
-**Figure 12: Decision Center dashboard page (platform and year-filtered views).**
+**Figure 15: Decision Center dashboard page (platform and year-filtered views).**
 
 ---
 
