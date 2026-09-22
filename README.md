@@ -14,11 +14,38 @@ This repository documents the Performance side of the analysis (the "are we reac
 
 ---
 
-## Opening Hook
 
 Eighteen months into a spending increase, the marketing team at FitPulse is still reporting strong numbers. Impressions are up. Reach is up. Return on ad spend still shows green in every dashboard export. So why does it feel like the harder the team pushes, the less ground gets covered?
 
 This project sets out to find the answer, not by assuming it, but by building the pipeline needed to actually see what the data says.
+
+---
+
+## Table of Contents
+
+1. [Description](#description)
+2. [Opening Hook](#opening-hook)
+3. [Project Overview](#project-overview)
+4. [Business Problem](#business-problem)
+5. [Tools and Technologies](#tools-and-technologies)
+6. [Skills Explored](#skills-explored)
+7. [Dataset Description](#dataset-description)
+   - [Data Dictionary, All 44 Columns](#data-dictionary-all-44-columns)
+8. [Data Cleaning Process](#data-cleaning-process)
+9. [Database Normalization and Views](#database-normalization-and-views)
+10. [KPIs and Why They Were Chosen](#kpis-and-why-they-were-chosen)
+11. [Dashboard Pages](#dashboard-pages)
+    - [Page 1: Executive Summary](#page-1-executive-summary)
+    - [Page 2: Awareness](#page-2-awareness)
+    - [Page 3: Attention](#page-3-attention)
+    - [Page 4: Interest and Conversion](#page-4-interest-and-conversion)
+    - [Page 5: Efficiency](#page-5-efficiency)
+    - [Page 6: Decision Center](#page-6-decision-center)
+12. [Overall Key Findings](#overall-key-findings)
+13. [Recommendations](#recommendations)
+14. [Caveats and Limitations](#caveats-and-limitations)
+15. [How to Explore](#how-to-explore)
+16. [Author and Contact](#author-and-contact)
 
 ---
 
